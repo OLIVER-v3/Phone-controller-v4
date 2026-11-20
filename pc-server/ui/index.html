@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Phone Controller</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-glow"></div>
+<div class="app">
+
+  <aside class="side">
+    <div class="brand">
+      <div class="brand-ic"><svg viewBox="0 0 24 24" width="26" height="26"><path fill="currentColor" d="M7 9h10a4 4 0 0 1 4 4l-.6 4.2a2 2 0 0 1-3.5 1L15.6 16H8.4l-1.3 2.2a2 2 0 0 1-3.5-1L3 13a4 4 0 0 1 4-4Zm.5 2v1.2H6.3v1.6h1.2V15h1.6v-1.2h1.2v-1.6H9.1V11H7.5Zm8.6.4a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm2 1.6a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z"/></svg></div>
+      <div><b>Phone Controller</b><small>PC Server <span id="ver">v4</span></small></div>
+    </div>
+    <nav>
+      <button class="nav active" data-tab="dash"><i>▣</i>Dashboard</button>
+      <button class="nav" data-tab="console"><i>›_</i>Console <span id="errBadge" class="badge hidden">0</span></button>
+      <button class="nav" data-tab="keys"><i>⌨</i>Key mapping</button>
+      <button class="nav" data-tab="settings"><i>⚙</i>Settings</button>
+      <button class="nav" data-tab="help"><i>?</i>Guide</button>
+    </nav>
+    <div class="side-foot">
+      <div id="modeBadge" class="mode-badge">—</div>
+      <button class="btn ghost small" id="btnQuit">Quit app</button>
+    </div>
+  </aside>
+
+  <main>
+    <header class="top">
+      <h1 id="pageTitle">Dashboard</h1>
+      <div class="pills">
+        <span class="pill" id="pAdb"><i></i>ADB</span>
+        <span class="pill" id="pPhone"><i></i>Phone</span>
+        <span class="pill" id="pSrv"><i></i>Server</span>
+        <span class="pill" id="pApp"><i></i>App</span>
+        <span class="pill" id="pPing"><i></i>— ms</span>
+      </div>
+    </header>
+
+    <!-- ============ DASHBOARD ============ -->
+    <section class="tab active" id="tab-dash">
+      <div class="grid">
+
+        <div class="card">
+          <div class="card-h"><h2>Phone (ADB)</h2><button class="btn small" id="btnRefresh">↻ Refresh</button></div>
+          <div class="phone-row">
+            <div class="phone">
+              <div class="phone-scr"><div class="phone-batt"><div id="battFill"></div></div><span id="battTxt">—</span></div>
+            </div>
+            <div class="phone-info">
+              <select id="devSel" class="input"></select>
+              <dl class="kv">
+                <dt>Device</dt><dd id="devName">—</dd>
+                <dt>Android</dt><dd id="devAndroid">—</dd>
+                <dt>Serial</dt><dd id="devSerial">—</dd>
+                <dt>State</dt><dd id="devState">—</dd>
+              </dl>
+            </div>
+          </div>
+          <div class="row">
+            <input id="adbPath" class="input mono" placeholder="adb path (auto)…" spellcheck="false">
+            <button class="btn small" id="btnAdbSet">Use</button>
+          </div>
+          <label class="check"><input type="checkbox" id="autoDetect" checked><span></span>Auto-detect phone every 5 s</label>
+        </div>
+
+        <div class="card">
+          <div class="card-h"><h2>Connection</h2></div>
+          <div class="row">
+            <label class="lbl">Port</label>
+            <input id="port" class="input narrow mono" type="number" min="1024" max="65535" value="5555">
+          </div>
+          <button class="btn primary big" id="btnConnect">Connect</button>
+          <div class="row wrap">
+            <button class="btn" id="btnOpen">Open app on phone</button>
+            <button class="btn" id="btnInstall">Install APK…</button>
+            <input type="file" id="apkFile" accept=".apk" hidden>
+          </div>
+          <p class="hint" id="connHint">Plug the phone with a USB cable, enable USB debugging, then press Connect.</p>
+        </div>
+
+        <div class="card wide">
+          <div class="card-h"><h2>Live input</h2>
+            <div class="chips"><span class="chip" id="liveMode">—</span><span class="chip" id="liveMouse">mouse: —</span></div>
+          </div>
+          <div class="live">
+            <canvas id="pad" width="760" height="380"></canvas>
+            <div class="stats">
+              <div class="stat"><small>Packets</small><b id="stRate">0</b><em>pkt/s</em></div>
+              <div class="stat"><small>Latency</small><b id="stRtt">—</b><em>ms</em></div>
+              <div class="stat"><small>Rumble L</small><div class="bar"><div id="rumL"></div></div></div>
+              <div class="stat"><small>Rumble R</small><div class="bar"><div id="rumR"></div></div></div>
+              <button class="btn small" id="btnRumble">Test rumble</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card wide">
+          <div class="card-h"><h2>Tools</h2></div>
+          <div class="tools">
+            <button class="btn" data-act="restart_adb">Restart ADB</button>
+            <button class="btn" data-act="remove_reverse">Remove tunnels</button>
+            <button class="btn" data-act="check_vigem">Check ViGEmBus</button>
+            <button class="btn" data-act="release_all">Release all keys</button>
+            <button class="btn" data-act="open_folder">Open config folder</button>
+            <a class="btn" href="https://gamepad-tester.com" target="_blank" rel="noreferrer">Gamepad tester ↗</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ CONSOLE ============ -->
+    <section class="tab" id="tab-console">
+      <div class="card fill">
+        <div class="card-h">
+          <h2>Console</h2>
+          <div class="row">
+            <select id="logFilter" class="input small"><option value="all">All</option><option value="err">Errors</option><option value="ok">OK</option></select>
+            <label class="check"><input type="checkbox" id="autoScroll" checked><span></span>Auto-scroll</label>
+            <button class="btn small" id="btnCopy">Copy</button>
+            <button class="btn small" id="btnSaveLog">Save</button>
+            <button class="btn small danger" id="btnClear">Clear</button>
+          </div>
+        </div>
+        <div id="logBox" class="log mono"></div>
+      </div>
+    </section>
+
+    <!-- ============ KEYS ============ -->
+    <section class="tab" id="tab-keys">
+      <div class="card">
+        <div class="card-h">
+          <h2>Key mapping (Keyboard + Mouse modes)</h2>
+          <select id="profSel" class="input small"><option value="minecraft">Minecraft</option><option value="roblox">Roblox</option><option value="racing">Racing (keyboard output)</option></select>
+        </div>
+        <p class="hint">Left stick = W A S D · Right stick = mouse look. Map every other button below.
+          Examples: <code>space</code> <code>lshift</code> <code>e</code> <code>mouse:left</code> <code>scroll:up</code> <code>f5</code>. Leave empty to disable.</p>
+        <div class="keygrid" id="keyGrid"></div>
+        <datalist id="keyList"></datalist>
+      </div>
+    </section>
+
+    <!-- ============ SETTINGS ============ -->
+    <section class="tab" id="tab-settings">
+      <div class="grid">
+        <div class="card">
+          <div class="card-h"><h2>Mouse sensitivity</h2></div>
+          <div class="slider"><label>Gamepad mode (MOUSE ON)</label><input type="range" id="sensPad" min="200" max="3000" step="50"><output id="sensPadV"></output></div>
+          <div class="slider"><label>Minecraft look</label><input type="range" id="sensMc" min="200" max="3000" step="50"><output id="sensMcV"></output></div>
+          <div class="slider"><label>Roblox look</label><input type="range" id="sensRb" min="200" max="3000" step="50"><output id="sensRbV"></output></div>
+        </div>
+        <div class="card">
+          <div class="card-h"><h2>Sticks</h2></div>
+          <div class="slider"><label>Stick → key threshold</label><input type="range" id="kthr" min="0.1" max="0.8" step="0.05"><output id="kthrV"></output></div>
+          <div class="slider"><label>Mouse dead-zone</label><input type="range" id="dzone" min="0" max="0.4" step="0.01"><output id="dzoneV"></output></div>
+          <p class="hint">Changes apply instantly and are saved to <code>config.json</code>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============ GUIDE ============ -->
+    <section class="tab" id="tab-help">
+      <div class="card guide">
+        <h2>របៀបប្រើ</h2>
+        <ol>
+          <li>ដំឡើង <b>ViGEmBus</b> លើ PC (ម្តងគត់) · ទូរស័ព្ទបើក <b>USB debugging</b> ហើយភ្ជាប់ខ្សែ USB។</li>
+          <li>ចុច <b>Refresh</b> ជ្រើសទូរស័ព្ទ រួចចុច <b>Connect</b>។</li>
+          <li>បើក app <i>Phone Controller</i> លើទូរស័ព្ទ (ឬចុច <b>Open app on phone</b>)។ ពេល <b>App</b> ឆ្លុះបៃតង គឺរួចរាល់។</li>
+          <li>ជ្រើស mode លើទូរស័ព្ទ៖ <b>Gamepad</b> (Roblox / Bedrock / ហ្គេម controller), <b>Minecraft Java</b>, <b>Roblox KB+Mouse</b>, <b>Touchpad</b> ឬ <b>Racing</b> (ងាកទូរស័ព្ទជាកង់ចង្កូត សម្រាប់ហ្គេមឡាន)។</li>
+          <li>ប៊ូតុង <b>KEYS</b> លើទូរស័ព្ទ = វាយអក្សរ (ខ្មែរបាន), Ctrl/Shift/Alt, Paste។ <b>GYRO</b> = ងាកទូរស័ព្ទដើម្បីបង្វិលកាមេរ៉ា។ <b>MOUSE ON</b> = stick ស្តាំជា cursor ក្នុង Gamepad mode។</li>
+        </ol>
+        <h2>បញ្ហាញឹកញាប់</h2>
+        <ul>
+          <li><b>App: waiting</b> → ពិនិត្យ <i>Console</i>, ចុច Restart ADB, ឬដោត USB ឡើងវិញ។</li>
+          <li>ហ្គេមរត់ជា Administrator → ត្រូវរត់ app នេះជា Administrator ដែរ។</li>
+          <li>ViGEmBus error → ដំឡើង driver រួច restart app។</li>
+        </ul>
+      </div>
+    </section>
+  </main>
+</div>
+<div id="toasts"></div>
+<script src="app.js"></script>
+</body>
+</html>

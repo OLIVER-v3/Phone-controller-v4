@@ -1,0 +1,74 @@
+{
+  "port": 5555,
+  "stick_key_threshold": 0.35,
+  "mouse_overlay": {
+    "mouse_sens": 900,
+    "deadzone": 0.12
+  },
+  "profiles": {
+    "minecraft": {
+      "keys": {
+        "A": "space",
+        "B": "lshift",
+        "X": "e",
+        "Y": "q",
+        "LB": "scroll:up",
+        "RB": "scroll:down",
+        "LT": "mouse:right",
+        "RT": "mouse:left",
+        "START": "esc",
+        "BACK": "tab",
+        "UP": "t",
+        "DOWN": "f5",
+        "LEFT": "f1",
+        "RIGHT": "f3",
+        "LS": "lctrl",
+        "RS": "f"
+      },
+      "mouse_sens": 1000,
+      "deadzone": 0.12,
+      "hold_rmb_on_look": false
+    },
+    "roblox": {
+      "keys": {
+        "A": "space",
+        "B": "lshift",
+        "X": "e",
+        "Y": "r",
+        "LB": "scroll:up",
+        "RB": "scroll:down",
+        "LT": "mouse:right",
+        "RT": "mouse:left",
+        "START": "esc",
+        "BACK": "tab",
+        "UP": "slash",
+        "DOWN": "3",
+        "LEFT": "1",
+        "RIGHT": "2"
+      },
+      "mouse_sens": 700,
+      "deadzone": 0.12,
+      "hold_rmb_on_look": true
+    },
+    "racing": {
+      "keys": {
+        "RT": "w",
+        "LT": "s",
+        "A": "space",
+        "B": "lshift",
+        "X": "h",
+        "Y": "c",
+        "LB": "q",
+        "RB": "e",
+        "UP": "l",
+        "DOWN": "v",
+        "LEFT": "z",
+        "RIGHT": "x",
+        "START": "esc",
+        "BACK": "r"
+      },
+      "deadzone": 0.12,
+      "steer_threshold": 0.25
+    }
+  }
+}

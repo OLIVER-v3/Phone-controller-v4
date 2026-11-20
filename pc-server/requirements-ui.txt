@@ -1,0 +1,3 @@
+# Optional: native window for the web UI (Windows uses Edge WebView2).
+# Without it the app opens the UI in your default browser.
+pywebview>=5.0

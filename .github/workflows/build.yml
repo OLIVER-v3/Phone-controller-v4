@@ -1,0 +1,100 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    name: Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+      - name: Build debug APK
+        working-directory: android-app
+        run: gradle assembleDebug --no-daemon
+      - name: Rename APK
+        run: cp android-app/app/build/outputs/apk/debug/app-debug.apk PhoneController.apk
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneController-apk
+          path: PhoneController.apk
+
+  pc:
+    name: PC server (.exe with web UI)
+    runs-on: windows-latest
+    timeout-minutes: 20
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      # vgamepad's setup.py tries to download and run the ViGEmBus driver installer,
+      # which hangs on a CI runner. We only need its Python files + ViGEmClient.dll,
+      # so take the package straight from the source archive (no setup.py is run).
+      - name: Fetch vgamepad package (without running its installer)
+        shell: pwsh
+        run: |
+          $v = "0.2.0"
+          Invoke-WebRequest "https://files.pythonhosted.org/packages/source/v/vgamepad/vgamepad-$v.tar.gz" -OutFile vg.tar.gz
+          tar -xzf vg.tar.gz
+          Copy-Item "vgamepad-$v\vgamepad" "pc-server\vgamepad" -Recurse
+          $dll = Get-ChildItem -Recurse pc-server\vgamepad -Filter ViGEmClient.dll
+          if (-not $dll) {
+            Get-ChildItem -Recurse pc-server\vgamepad | Select-Object -First 40 FullName
+            throw "ViGEmClient.dll not found in the vgamepad archive"
+          }
+          $dll | ForEach-Object { Write-Host "found" $_.FullName }
+
+      - name: Build exe
+        shell: pwsh
+        run: |
+          pip install -r pc-server/requirements-ui.txt pyinstaller
+          pyinstaller --onefile --windowed --name PhoneControllerServer `
+            --collect-all webview `
+            --add-data "pc-server/ui;ui" `
+            --add-data "pc-server/vgamepad;vgamepad" `
+            --paths pc-server pc-server/app.py
+
+      - name: Bundle adb (Android platform-tools) and zip
+        shell: pwsh
+        run: |
+          Invoke-WebRequest https://dl.google.com/android/repository/platform-tools-latest-windows.zip -OutFile pt.zip
+          Expand-Archive pt.zip -DestinationPath pt
+          New-Item -ItemType Directory -Force dist\adb | Out-Null
+          Copy-Item pt\platform-tools\adb.exe, pt\platform-tools\AdbWinApi.dll, pt\platform-tools\AdbWinUsbApi.dll dist\adb\
+          Copy-Item pc-server\config.json dist\config.json
+          Compress-Archive -Path dist\PhoneControllerServer.exe, dist\config.json, dist\adb -DestinationPath PhoneController-PC.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PhoneController-PC-server
+          path: PhoneController-PC.zip
+
+  release:
+    name: Publish release
+    needs: [apk, pc]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
